@@ -25,16 +25,7 @@ class _IdeasScreenState extends State<IdeasScreen> {
   }
 
   Future<void> _refreshIdeas() async {
-    try {
-      await context.read<IdeasProvider>().fetchIdeas();
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to refresh ideas.')));
-    }
+    await context.read<IdeasProvider>().fetchIdeas();
   }
 
   Future<void> _deleteIdea(String ideaId) async {

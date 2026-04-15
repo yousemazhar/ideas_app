@@ -11,6 +11,8 @@ class IdeasProvider extends ChangeNotifier {
   IdeasProvider({IdeasCacheService? cacheService})
     : _cacheService = cacheService ?? IdeasCacheService();
 
+  static const Duration _requestTimeout = Duration(seconds: 10);
+
   final IdeasCacheService _cacheService;
   final List<Idea> _ideas = [];
 
@@ -54,7 +56,9 @@ class IdeasProvider extends ChangeNotifier {
       final Uri url = Uri.parse(
         '${AppConfig.firebaseBaseUrl}${AppConfig.ideasCollectionPath}.json',
       );
-      final http.Response response = await http.get(url);
+      final http.Response response = await http
+          .get(url)
+          .timeout(_requestTimeout);
 
       if (response.statusCode >= 400) {
         throw Exception('Failed to fetch ideas from the server.');
@@ -98,12 +102,19 @@ class IdeasProvider extends ChangeNotifier {
       final Uri url = Uri.parse(
         '${AppConfig.firebaseBaseUrl}${AppConfig.ideasCollectionPath}.json',
       );
-      final http.Response response = await http.post(
-        url,
-        body: jsonEncode(
-          Idea(id: '', title: title, description: description).toFirebaseJson(),
-        ),
-      );
+      final http.Response response = await http
+          .post(
+            url,
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode(
+              Idea(
+                id: '',
+                title: title,
+                description: description,
+              ).toFirebaseJson(),
+            ),
+          )
+          .timeout(_requestTimeout);
 
       if (response.statusCode >= 400) {
         throw Exception('Failed to add idea.');
@@ -136,7 +147,9 @@ class IdeasProvider extends ChangeNotifier {
       final Uri url = Uri.parse(
         '${AppConfig.firebaseBaseUrl}${AppConfig.ideasCollectionPath}/$id.json',
       );
-      final http.Response response = await http.delete(url);
+      final http.Response response = await http
+          .delete(url)
+          .timeout(_requestTimeout);
 
       if (response.statusCode >= 400) {
         throw Exception('Failed to delete idea.');
